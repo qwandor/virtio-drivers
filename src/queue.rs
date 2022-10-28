@@ -61,6 +61,7 @@ impl<H: Hal> VirtQueue<H> {
             layout.driver_area_paddr(),
             layout.device_area_paddr(),
         );
+        assert!(transport.queue_used(idx));
 
         let desc = NonNull::new(ptr::slice_from_raw_parts_mut(
             layout.descriptors_vaddr() as *mut Descriptor,
@@ -188,6 +189,7 @@ impl<H: Hal> VirtQueue<H> {
 
         // Safe because self.used points to a valid, aligned, initialised, dereferenceable, readable
         // instance of UsedRing.
+        //unsafe {            log::trace!("used: {:?}", self.used.as_ref());        };
         self.last_used_idx != unsafe { (*self.used.as_ptr()).idx }
     }
 

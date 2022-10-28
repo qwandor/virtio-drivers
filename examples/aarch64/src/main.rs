@@ -44,7 +44,7 @@ pub const UART_BASE_ADDRESS: usize = 0x3f8;
 
 #[no_mangle]
 extern "C" fn main(x0: u64, x1: u64, x2: u64, x3: u64) {
-    logger::init(LevelFilter::Debug).unwrap();
+    logger::init(LevelFilter::Trace).unwrap();
     info!("virtio-drivers example started.");
     debug!(
         "x0={:#018x}, x1={:#018x}, x2={:#018x}, x3={:#018x}",

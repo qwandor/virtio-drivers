@@ -59,6 +59,7 @@ impl<H: Hal, T: Transport> VirtIOGpu<'_, H, T> {
 
         let control_queue = VirtQueue::new(&mut transport, QUEUE_TRANSMIT, 2)?;
         let cursor_queue = VirtQueue::new(&mut transport, QUEUE_CURSOR, 2)?;
+        trace!("Set up queues");
 
         let dma_send = Dma::new(1, BufferDirection::DriverToDevice)?;
         let dma_recv = Dma::new(1, BufferDirection::DeviceToDriver)?;
@@ -66,6 +67,7 @@ impl<H: Hal, T: Transport> VirtIOGpu<'_, H, T> {
         let queue_buf_recv = unsafe { dma_recv.as_buf() };
 
         transport.finish_init();
+        trace!("Finished init");
 
         Ok(VirtIOGpu {
             transport,
@@ -175,11 +177,13 @@ impl<H: Hal, T: Transport> VirtIOGpu<'_, H, T> {
         unsafe {
             (self.queue_buf_send.as_mut_ptr() as *mut Req).write(req);
         }
+        trace!("control_queue.add_notify_wait_pop");
         self.control_queue.add_notify_wait_pop(
             &[self.queue_buf_send],
             &[self.queue_buf_recv],
             &mut self.transport,
         )?;
+        trace!("Returning response");
         Ok(unsafe { (self.queue_buf_recv.as_ptr() as *const Rsp).read() })
     }
 
@@ -194,7 +198,9 @@ impl<H: Hal, T: Transport> VirtIOGpu<'_, H, T> {
     }
 
     fn get_display_info(&mut self) -> Result<RespDisplayInfo> {
+        trace!("get_display_info");
         let info: RespDisplayInfo = self.request(CtrlHeader::with_type(Command::GetDisplayInfo))?;
+        trace!("get_display_info: got info");
         info.header.check_type(Command::OkDisplayInfo)?;
         Ok(info)
     }
