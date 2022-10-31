@@ -68,7 +68,9 @@ impl<H: Hal, T: Transport> VirtIOBlk<H, T> {
         info!("found a block device of size {}KB", capacity / 2);
 
         let queue = VirtQueue::new(&mut transport, QUEUE, 16)?;
+        trace!("Set up queue");
         transport.finish_init();
+        trace!("Finished init");
 
         Ok(VirtIOBlk {
             transport,
@@ -222,12 +224,15 @@ impl<H: Hal, T: Transport> VirtIOBlk<H, T> {
             reserved: 0,
             sector: block_id as u64,
         };
+        trace!("Writing block: {:?}", req);
         let mut resp = BlkResp::default();
+        trace!("add_notify_wait_pop");
         self.queue.add_notify_wait_pop(
             &[req.as_bytes(), buf],
             &[resp.as_bytes_mut()],
             &mut self.transport,
         )?;
+        trace!("Popped");
         match resp.status {
             RespStatus::OK => Ok(()),
             _ => Err(Error::IoError),

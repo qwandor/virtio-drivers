@@ -16,6 +16,7 @@ use core::{
     mem::{align_of, size_of},
     ptr::{self, addr_of_mut, NonNull},
 };
+use log::trace;
 
 /// The PCI vendor ID for VirtIO devices.
 const VIRTIO_VENDOR_ID: u16 = 0x1af4;
@@ -284,6 +285,7 @@ impl Transport for PciTransport {
             volwrite!(self.common_cfg, queue_device, device_area as u64);
             volwrite!(self.common_cfg, queue_enable, 1);
         }
+        trace!("Enabled queue {} with size {}, descriptors at {:#x}, driver area {:#x}, device area {:#x}", queue, size, descriptors, driver_area, device_area);
     }
 
     fn queue_unset(&mut self, queue: u16) {
@@ -374,6 +376,7 @@ fn get_bar_region<H: Hal, T>(
     device_function: DeviceFunction,
     struct_info: &VirtioCapabilityInfo,
 ) -> Result<NonNull<T>, VirtioPciError> {
+    trace!("Getting bar region for {:?}", struct_info);
     let bar_info = root.bar_info(device_function, struct_info.bar)?;
     let (bar_address, bar_size) = bar_info
         .memory_address_size()
