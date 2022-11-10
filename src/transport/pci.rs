@@ -394,6 +394,7 @@ fn get_bar_region<H: Hal, T>(
             alignment: align_of::<T>(),
         });
     }
+    // TODO: Validate that these regions are actually where we expect them to be, and not in our memory due to a malicious host.
     Ok(NonNull::new(vaddr as _).unwrap())
 }
 
